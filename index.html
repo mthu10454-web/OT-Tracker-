@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT & Attendance Tracker</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f0f2f5; margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .app-card { background: white; width: 100%; max-width: 480px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h2 { margin: 0 0 4px 0; color: #1e293b; font-size: 22px; }
+        .header p { margin: 0; color: #64748b; font-size: 13px; font-weight: 500; }
+        
+        .btn-main { width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25); margin-bottom: 20px; cursor: pointer; }
+        .btn-main:active { transform: scale(0.98); }
+        
+        .section-title { font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        
+        .grid-ot { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 25px; }
+        .btn-ot { padding: 14px 10px; background: #f8fafc; color: #2563eb; border: 1.5px solid #dbeafe; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-ot:active { background: #2563eb; color: white; border-color: #2563eb; }
+        .btn-ot.span-2 { grid-column: span 2; }
+        
+        .summary-box { background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; border-bottom: 1px dashed #cbd5e1; }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: #475569; }
+        .summary-val { font-weight: 700; color: #0f172a; }
+        
+        .history-box { max-height: 160px; overflow-y: auto; background: #fafafa; border-radius: 10px; padding: 10px; border: 1px solid #f1f5f9; font-size: 13px; color: #64748b; }
+        .history-item { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+        .history-item:last-child { border-bottom: none; }
+        
+        .btn-reset { width: 100%; margin-top: 20px; padding: 12px; background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <div class="header">
+            <h2>OAKKER KYAW</h2>
+            <p id="currentDateDisplay">ယနေ့ရက်စွဲ: -</p>
+        </div>
+        
+        <!-- ပုံမှန်ခလုတ် -->
+        <button class="btn-main" onclick="logAttendance(1, 0)">✓ ပုံမှန်အလုပ်ဆင်းရက် (၁ ရက်)</button>
+        
+        <div class="section-title">
+            <span>+ OT အချိန် ရွေးချယ်ရန်</span>
+        </div>
+        
+        <!-- OT ခလုတ်များ (နှိပ်သမျှ ပေါင်းထည့်ပေးမည်) -->
+        <div class="grid-ot">
+            <button class="btn-ot" onclick="logAttendance(0, 1)">+ 1 နာရီ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 1.5)">+ 1 နာရီခွဲ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 2)">+ 2 နာရီ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 2.5)">+ 2 နာရီခွဲ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 3)">+ 3 နာရီ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 3.5)">+ 3 နာရီခွဲ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 4)">+ 4 နာရီ</button>
+            <button class="btn-ot" onclick="logAttendance(0, 4.5)">+ 4 နာရီခွဲ</button>
+            <button class="btn-ot span-2" onclick="logAttendance(0, 5)">+ 5 နာရီ</button>
+        </div>
+
+        <!-- လအလိုက် စုစုပေါင်း စာရင်း -->
+        <div class="summary-box">
+            <div class="section-title" id="monthTitle" style="margin-top: 0;">ဒီလ စုစုပေါင်း စာရင်း</div>
+            <div class="summary-row">
+                <span class="summary-label">အလုပ်ဆင်းရက်</span>
+                <span class="summary-val" id="totalDays">0 ရက်</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">OT စုစုပေါင်း</span>
+                <span class="summary-val" id="totalOt">0 နာရီ</span>
+            </div>
+        </div>
+
+        <!-- ရက်အလိုက် မှတ်တမ်းများ -->
+        <div class="section-title">ရက်အလိုက် မှတ်တမ်းများ</div>
+        <div class="history-box" id="logHistory">
+            မှတ်တမ်း မရှိသေးပါ။
+        </div>
+        
+        <button class="btn-reset" onclick="resetData()">စာရင်းအားလုံး ဖျက်မည် (Reset)</button>
+    </div>
+
+    <script>
+        // လက်ရှိ ဖုန်းထဲက အချိန်နှင့် ရက်စွဲကို တိကျစွာ ရယူရန်
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        
+        document.getElementById('currentDateDisplay').innerText = `ယနေ့ရက်စွဲ: ${todayStr}`;
+        document.getElementById('monthTitle').innerText = `${year} ခုနှစ်၊ ${month} လပိုင်း စာရင်း`;
+
+        let storageKey = `historyLogs_${year}_${month}`;
+        let historyLogs = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+        function calculateTotals() {
+            let d = 0;
+            let o = 0;
+            historyLogs.forEach(log => {
+                d += log.day;
+                o += log.ot;
+            });
+            return { d, o };
+        }
+
+        function updateDisplay() {
+            let totals = calculateTotals();
+            document.getElementById('totalDays').innerText = `${totals.d} ရက်`;
+            document.getElementById('totalOt').innerText = `${totals.o} နာရီ`;
+
+            const historyDiv = document.getElementById('logHistory');
+            if (historyLogs.length === 0) {
+                historyDiv.innerHTML = '<div style="text-align:center; padding: 10px;">မှတ်တမ်း မရှိသေးပါ။</div>';
+            } else {
+                historyDiv.innerHTML = historyLogs.map(log => 
+                    `<div class="history-item">📅 <b>${log.date}</b> — အလုပ်: ${log.day} ရက် | OT: ${log.ot} နာရီ</div>`
+                ).join('');
+            }
+        }
+        updateDisplay();
+
+        function logAttendance(addDay, addOt) {
+            // ယနေ့ရက်စွဲအတွက် မှတ်တမ်းရှိမရှိ ရှာရန်
+            let existingLog = historyLogs.find(log => log.date === todayStr);
+
+            if (existingLog) {
+                // ရှိပြီးသားဆိုရင် တန်ဖိုးအသစ်ကို ပေါင်းထည့်မည် (အကြိမ်ကြိမ် နှိပ်လို့ရပါပြီ)
+                if (addDay > 0) {
+                    existingLog.day += addDay;
+                }
+                if (addOt > 0) {
+                    existingLog.ot += addOt;
+                }
+            } else {
+                // မရှိသေးရင် ရက်စွဲအသစ်ဖြင့် အသစ်ထည့်မည်
+                historyLogs.unshift({ date: todayStr, day: addDay, ot: addOt });
+            }
+
+            localStorage.setItem(storageKey, JSON.stringify(historyLogs));
+            updateDisplay();
+        }
+
+        function resetData() {
+            if(confirm("ယခုလ စာရင်းအားလုံးကို ဖျက်မှာ သေချာပါသလား?")) {
+                localStorage.removeItem(storageKey);
+                historyLogs = [];
+                updateDisplay();
+            }
+        }
+    </script>
+</body>
+</html>
