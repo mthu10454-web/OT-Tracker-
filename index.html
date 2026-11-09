@@ -2,6 +2,40 @@
 <html lang="my">
 <head>
     <meta charset="UTF-8">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K7NPT2RY02"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-K7NPT2RY02');
+</script>
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT & Attendance Tracker</title>
+    
+    <!-- ဒီနေရာ (သို့မဟုတ် </head> ရဲ့အပေါ်) မှာ ထည့်ပါ -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7NPT2RY02"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K7NPT2RY02');
+    </script>
+
+    <style>
+        /* CSS styles တွေက ဒီအောက်မှာ ဆက်ရှိနေပါမယ် */
+    </style>
+</head>
+<body>
+    <!-- Body content တွေ -->
+</body>
+</html>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OT & Attendance Tracker</title>
     <style>
@@ -43,14 +77,12 @@
             <p id="currentDateDisplay">ယနေ့ရက်စွဲ: -</p>
         </div>
         
-        <!-- ပုံမှန်ခလုတ် -->
         <button class="btn-main" onclick="logAttendance(1, 0)">✓ ပုံမှန်အလုပ်ဆင်းရက် (၁ ရက်)</button>
         
         <div class="section-title">
             <span>+ OT အချိန် ရွေးချယ်ရန်</span>
         </div>
         
-        <!-- OT ခလုတ်များ (နှိပ်သမျှ ပေါင်းထည့်ပေးမည်) -->
         <div class="grid-ot">
             <button class="btn-ot" onclick="logAttendance(0, 1)">+ 1 နာရီ</button>
             <button class="btn-ot" onclick="logAttendance(0, 1.5)">+ 1 နာရီခွဲ</button>
@@ -63,7 +95,6 @@
             <button class="btn-ot span-2" onclick="logAttendance(0, 5)">+ 5 နာရီ</button>
         </div>
 
-        <!-- လအလိုက် စုစုပေါင်း စာရင်း -->
         <div class="summary-box">
             <div class="section-title" id="monthTitle" style="margin-top: 0;">ဒီလ စုစုပေါင်း စာရင်း</div>
             <div class="summary-row">
@@ -76,7 +107,6 @@
             </div>
         </div>
 
-        <!-- ရက်အလိုက် မှတ်တမ်းများ -->
         <div class="section-title">ရက်အလိုက် မှတ်တမ်းများ</div>
         <div class="history-box" id="logHistory">
             မှတ်တမ်း မရှိသေးပါ။
@@ -86,50 +116,56 @@
     </div>
 
     <script>
-        // လက်ရှိ ဖုန်းထဲက အချိန်နှင့် ရက်စွဲကို တိကျစွာ ရယူရန်
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth() + 1;
-        const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const todayStr = year + '-' + String(month).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
         
         document.getElementById('currentDateDisplay').innerText = `ယနေ့ရက်စွဲ: ${todayStr}`;
         document.getElementById('monthTitle').innerText = `${year} ခုနှစ်၊ ${month} လပိုင်း စာရင်း`;
 
-        let storageKey = `historyLogs_${year}_${month}`;
+        let storageKey = 'historyLogs_' + year + '_' + month;
         let historyLogs = JSON.parse(localStorage.getItem(storageKey)) || [];
 
         function calculateTotals() {
             let d = 0;
             let o = 0;
-            historyLogs.forEach(log => {
+            historyLogs.forEach(function(log) {
                 d += log.day;
                 o += log.ot;
             });
-            return { d, o };
+            return { d: d, o: o };
         }
 
         function updateDisplay() {
             let totals = calculateTotals();
-            document.getElementById('totalDays').innerText = `${totals.d} ရက်`;
-            document.getElementById('totalOt').innerText = `${totals.o} နာရီ`;
+            document.getElementById('totalDays').innerText = totals.d + ' ရက်';
+            document.getElementById('totalOt').innerText = totals.o + ' နာရီ';
 
             const historyDiv = document.getElementById('logHistory');
             if (historyLogs.length === 0) {
                 historyDiv.innerHTML = '<div style="text-align:center; padding: 10px;">မှတ်တမ်း မရှိသေးပါ။</div>';
             } else {
-                historyDiv.innerHTML = historyLogs.map(log => 
-                    `<div class="history-item">📅 <b>${log.date}</b> — အလုပ်: ${log.day} ရက် | OT: ${log.ot} နာရီ</div>`
-                ).join('');
+                let htmlContent = '';
+                for (let i = 0; i < historyLogs.length; i++) {
+                    let log = historyLogs[i];
+                    htmlContent += '<div class="history-item">📅 <b>' + log.date + '</b> — အလုပ်: ' + log.day + ' ရက် | OT: ' + log.ot + ' နာရီ</div>';
+                }
+                historyDiv.innerHTML = htmlContent;
             }
         }
         updateDisplay();
 
         function logAttendance(addDay, addOt) {
-            // ယနေ့ရက်စွဲအတွက် မှတ်တမ်းရှိမရှိ ရှာရန်
-            let existingLog = historyLogs.find(log => log.date === todayStr);
+            let existingLog = null;
+            for (let i = 0; i < historyLogs.length; i++) {
+                if (historyLogs[i].date === todayStr) {
+                    existingLog = historyLogs[i];
+                    break;
+                }
+            }
 
             if (existingLog) {
-                // ရှိပြီးသားဆိုရင် တန်ဖိုးအသစ်ကို ပေါင်းထည့်မည် (အကြိမ်ကြိမ် နှိပ်လို့ရပါပြီ)
                 if (addDay > 0) {
                     existingLog.day += addDay;
                 }
@@ -137,7 +173,6 @@
                     existingLog.ot += addOt;
                 }
             } else {
-                // မရှိသေးရင် ရက်စွဲအသစ်ဖြင့် အသစ်ထည့်မည်
                 historyLogs.unshift({ date: todayStr, day: addDay, ot: addOt });
             }
 
